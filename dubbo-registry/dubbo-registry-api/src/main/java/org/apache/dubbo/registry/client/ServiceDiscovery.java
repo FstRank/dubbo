@@ -28,7 +28,7 @@ import java.util.Set;
 import static org.apache.dubbo.common.constants.CommonConstants.REGISTRY_DELAY_NOTIFICATION_KEY;
 
 /**
- * Defines the common operations of Service Discovery, extended and loaded by ServiceDiscoveryFactory
+ * 定义由ServiceDiscoveryFactory扩展和加载的服务发现的通用操作
  */
 public interface ServiceDiscovery extends RegistryService, Prioritized {
 

@@ -40,7 +40,11 @@ import static org.apache.dubbo.common.constants.LoggerCodeConstants.REGISTRY_FAI
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.REGISTRY_UNEXPECTED_EXCEPTION;
 
 /**
+ * 注册表管理器
  * Application Level, used to collect Registries
+ *
+ * @author zhubo
+ * @date 2022/12/10
  */
 public class RegistryManager {
     private static final ErrorTypeAwareLogger LOGGER = LoggerFactory.getErrorTypeAwareLogger(RegistryManager.class);
@@ -48,14 +52,13 @@ public class RegistryManager {
     private ApplicationModel applicationModel;
 
     /**
-     * Registry Collection Map<RegistryAddress, Registry>
-     */
-    private final Map<String, Registry> registries = new ConcurrentHashMap<>();
-
-    /**
-     * The lock for the acquisition process of the registry
+     * 用于注册表获取过程的互斥锁
      */
     protected final ReentrantLock lock = new ReentrantLock();
+    /**
+     * 注册中心映射Map<key=注册名称、value=注册中心>
+     */
+    private final Map<String, Registry> registries = new ConcurrentHashMap<>();
 
     private final AtomicBoolean destroyed = new AtomicBoolean(false);
 
@@ -64,6 +67,7 @@ public class RegistryManager {
     }
 
     /**
+     * 获得所有注册中心
      * Get all registries
      *
      * @return all registries
@@ -72,10 +76,12 @@ public class RegistryManager {
         return Collections.unmodifiableCollection(new LinkedList<>(registries.values()));
     }
 
+    //根据名称获取注册中心
     public Registry getRegistry(String key) {
         return registries.get(key);
     }
 
+    //添加注册中心
     public void putRegistry(String key, Registry registry) {
         registries.put(key, registry);
     }
@@ -89,9 +95,7 @@ public class RegistryManager {
             .collect(Collectors.toList());
     }
 
-    /**
-     * Close all created registries
-     */
+    //关闭所有注册中心
     public void destroyAll() {
         if (!destroyed.compareAndSet(false, true)) {
             return;
@@ -100,16 +104,18 @@ public class RegistryManager {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Close all registries " + getRegistries());
         }
-        // Lock up the registry shutdown process
+        // 锁定注册表关闭过程
         lock.lock();
         try {
             for (Registry registry : getRegistries()) {
                 try {
+                    //调用关闭方法
                     registry.destroy();
                 } catch (Throwable e) {
                     LOGGER.warn(REGISTRY_UNEXPECTED_EXCEPTION, "", "", e.getMessage(), e);
                 }
             }
+            // 清空Map
             registries.clear();
         } finally {
             // Release the lock
@@ -118,7 +124,7 @@ public class RegistryManager {
     }
 
     /**
-     * Reset state of AbstractRegistryFactory
+     * 重置AbstractRegistryFactory的状态
      */
     public void reset() {
         destroyed.set(false);

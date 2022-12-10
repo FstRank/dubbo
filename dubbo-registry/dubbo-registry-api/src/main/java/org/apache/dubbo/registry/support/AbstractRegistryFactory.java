@@ -40,9 +40,10 @@ import static org.apache.dubbo.rpc.cluster.Constants.REFER_KEY;
  * @see org.apache.dubbo.registry.RegistryFactory
  */
 public abstract class AbstractRegistryFactory implements RegistryFactory, ScopeModelAware {
-
+    // logger
     private static final ErrorTypeAwareLogger LOGGER = LoggerFactory.getErrorTypeAwareLogger(AbstractRegistryFactory.class);
 
+    //注册表管理器
     private RegistryManager registryManager;
     protected ApplicationModel applicationModel;
 
@@ -52,11 +53,12 @@ public abstract class AbstractRegistryFactory implements RegistryFactory, ScopeM
         this.registryManager = applicationModel.getBeanFactory().getBean(RegistryManager.class);
     }
 
+    //获取到所有注册中心
     @Override
     public Registry getRegistry(URL url) {
         if (registryManager == null) {
             throw new IllegalStateException("Unable to fetch RegistryManager from ApplicationModel BeanFactory. " +
-                "Please check if `setApplicationModel` has been override.");
+                    "Please check if `setApplicationModel` has been override.");
         }
 
         Registry defaultNopRegistry = registryManager.getDefaultNopRegistryIfDestroyed();
@@ -65,12 +67,12 @@ public abstract class AbstractRegistryFactory implements RegistryFactory, ScopeM
         }
 
         url = URLBuilder.from(url)
-            .setPath(RegistryService.class.getName())
-            .addParameter(INTERFACE_KEY, RegistryService.class.getName())
-            .removeParameter(TIMESTAMP_KEY)
-            .removeAttribute(EXPORT_KEY)
-            .removeAttribute(REFER_KEY)
-            .build();
+                .setPath(RegistryService.class.getName())
+                .addParameter(INTERFACE_KEY, RegistryService.class.getName())
+                .removeParameter(TIMESTAMP_KEY)
+                .removeAttribute(EXPORT_KEY)
+                .removeAttribute(REFER_KEY)
+                .build();
 
         String key = createRegistryCacheKey(url);
         Registry registry = null;
@@ -106,7 +108,7 @@ public abstract class AbstractRegistryFactory implements RegistryFactory, ScopeM
             } else {
                 // 1-11 Failed to obtain or create registry (service) object.
                 LOGGER.warn(REGISTRY_FAILED_CREATE_INSTANCE, "", "",
-                    "Failed to obtain or create registry ", e);
+                        "Failed to obtain or create registry ", e);
             }
         } finally {
             // Release the lock
